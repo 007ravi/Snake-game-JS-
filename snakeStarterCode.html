@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background: black; display: flex; align-items: center; justify-content: center; }
+    canvas { border: 1px solid white; }
+  </style>
+</head>
+<body onload=start()>
+  <div id="score" style="color:Yellow">Your Score:0</div>
+<canvas width="400" height="400" id="game"></canvas>
+<script>
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
+var grid = 16;
+var score=document.getElementById("score");
+var count = getCount();
+var previousbtn=getCurrentbtn();
+var currentbtn=getCurrentbtn();
+var left=37,right=39,up=38,down=40;
+var flag=1;
+var snake=getSnake();
+var apple=getApple();
+
+if(snake.length==0)
+{count=0;
+  previousbtn=37;
+  currentbtn=37;
+snake = 
+{
+  x : 160,
+  y : 160 ,
+ cells : [{x:160 , y:160} , {x:144 , y:160}] ,
+};
+
+apple = {
+  x: 320,
+  y: 320
+};
+}
+// draw apple
+function drawApple()
+{
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1); 
+}
+drawApple();
+
+function start()
+{
+  flag=1;
+  context.fillStyle="white";
+context.font="30px Arial";
+  context.clearRect(0, 0, canvas.width,canvas.height);
+  context.fillText("Press Enter to play",100,150);
+
+}
+function automove()
+{
+  context.clearRect(0, 0, canvas.width,canvas.height);
+
+  drawSnake();
+  moveSnake(currentbtn);
+  drawApple();
+  checkCollision();
+  if(flag==1)
+  setTimeout(automove,160);
+}
+// draw snake
+function drawSnake()
+{
+  context.fillStyle = 'green';
+//  console.log(snake.cells.length);
+  for(let i=0 ; i<snake.cells.length ; i++){
+   if(i==0)
+   context.fillStyle = 'green';
+   else
+   context.fillStyle = 'cyan';
+    context.fillRect(snake.cells[i].x, snake.cells[i].y, grid-1, grid-1);
+   
+  }
+storeSnake(snake,currentbtn,count);
+storeApple(apple);
+
+}
+//drawSnake();  
+
+function moveSnake(currentbtn)
+{
+  var x=snake.x,y=snake.y;
+  var dx=0,dy=0;
+  if(currentbtn==left)
+  {
+    dx = -grid;
+    x=x+dx;
+if(x==-16)
+{ snake.y += dy ;
+snake.x=384;
+}
+else{
+  snake.x += dx ;
+  snake.y += dy ;
+}
+checkCollision();
+  }
+
+  else if(currentbtn==right)
+  {
+    dx = grid;
+    x=x+dx;
+    if(x==400)
+    {snake.x=0;
+  snake.y += dy ;
+    } 
+  else
+  {
+    snake.x += dx ;
+  snake.y += dy ;
+  }
+  checkCollision();
+  }
+
+
+  else if(currentbtn==up)
+  {
+    dy = -grid;
+    dx = 0;
+    y=y+dy;
+    if(y==-16)
+    {
+      snake.x += dx;
+      snake.y=384;
+    }
+    else{
+      snake.x += dx ;
+  snake.y += dy ;
+    }
+    checkCollision();
+  }
+
+
+  else if(currentbtn==down)
+  {
+    dy = grid;
+    dx = 0;
+    if(y==384)
+    {  snake.x += dx ;
+    snake.y=0;
+    }
+    else{
+      snake.x += dx ;
+  snake.y += dy ;
+    }
+    checkCollision();
+  }
+
+  var random=0;
+  snake.cells.unshift({x: snake.x , y: snake.y}) ; // Insert at 0th position\
+  if(snake.x==apple.x && snake.y==apple.y)
+  {count=count+1;
+    var str="Your Score:"+count;
+    score.innerHTML=str;
+    score.setAttribute("style","color:Yellow;");
+    console.log(str);
+    while(1)
+    { var f=1;
+    randomx=Math.floor(Math.random()*(24 - 0)) + 0;
+    randomy=Math.floor(Math.random()*(24 - 0)) + 0;
+    randomx=randomx*16;
+    randomy=randomy*16;
+    for(var i=0;i<snake.cells.length;i++)
+    {
+      if(randomx==snake.cells[i].x  && randomy==snake.cells[i].y)
+      {f=0;
+        break;
+      }
+    }
+    if(f==1)
+    break;
+    }
+    apple.x=randomx;
+    apple.y=randomy;
+    drawApple();
+  }
+  else{
+  snake.cells.pop(); 
+  } // remove the last element
+
+  drawSnake();
+}
+
+function checkCollision()
+{context.fillStyle="white";
+context.font="30px Arial";
+var f=0;
+  
+ for(var i=2;i<snake.cells.length;i++)
+ {
+   if(snake.x==snake.cells[i].x && snake.y==snake.cells[i].y)
+   {//initialize();
+     context.clearRect(0, 0, canvas.width,canvas.height);
+     context.fillText("Game over",100,200);
+     flag=0;
+     previousbtn=37;
+  currentbtn=37;
+  count=0;
+snake = 
+{
+  x : 160,
+  y : 160 ,
+ cells : [{x:160 , y:160} , {x:144 , y:160}] ,
+};
+
+apple = {
+  x: 320,
+  y: 320
+};
+     break;
+ 
+   }
+ }
+
+}
+// listen to keyboard events to move the snake
+document.addEventListener('keydown', function(e) 
+{
+var f,arrow;
+  // left arrow key
+  if (e.keyCode == left && previousbtn!=right) 
+  {previousbtn=left;
+  currentbtn=left;
+  moveSnake(currentbtn);
+  }
+   // up arrow key
+  else if (e.keyCode == up && previousbtn!=down) 
+  {currentbtn=up;
+  previousbtn=up;
+  moveSnake(currentbtn);
+  }
+   // right arrow key
+  else if (e.keyCode == right && previousbtn!=left) 
+  {currentbtn=right;
+  previousbtn=right;
+  moveSnake(currentbtn);
+  }
+   // down arrow key
+  else if (e.keyCode == down && previousbtn!=up) 
+  {currentbtn=down;
+  previousbtn=down;
+  moveSnake(currentbtn);
+  }
+  else if(e.keyCode==13){
+   flag=1;
+   if(snake.length==0)
+   {
+    snake = 
+{
+  x : 160,
+  y : 160 ,
+ cells : [{x:160 , y:160} , {x:144 , y:160}] ,
+};
+
+   apple = {
+  x: 320,
+  y: 320
+};
+   }
+   automove();
+
+ //  window.location.href="snakeStarterCode.html";
+  }
+  else if(e.keyCode==32)
+  {
+    automove();
+  }
+  drawApple();
+});
+function storeApple(apple)
+{
+  localStorage.apple = JSON.stringify(apple);
+}
+function getApple()
+{
+  if (!localStorage.apple) {
+        localStorage.apple = JSON.stringify([]);
+    }
+    return JSON.parse(localStorage.apple); 
+}
+function getSnake()
+{
+  if (!localStorage.snake) {
+        localStorage.snake = JSON.stringify([]);
+    }
+    return JSON.parse(localStorage.snake); 
+}
+function storeSnake(snake,currentbtn,count)
+{
+  localStorage.snake = JSON.stringify(snake);
+  localStorage.currentbtn = JSON.stringify(currentbtn);
+  localStorage.count = JSON.stringify(count);
+}
+function getCurrentbtn()
+{
+  if (!localStorage.currentbtn) {
+        localStorage.currentbtn = JSON.stringify([]);
+    }
+    return JSON.parse(localStorage.currentbtn); 
+}
+function getCount()
+{
+  if (!localStorage.count) {
+        localStorage.count = JSON.stringify([]);
+    }
+    return JSON.parse(localStorage.count); 
+}
+</script>
+</body>
+</html>
